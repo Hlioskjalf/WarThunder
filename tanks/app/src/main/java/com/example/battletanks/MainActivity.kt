@@ -14,11 +14,15 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.marginLeft
 import androidx.core.view.marginTop
-import com.example.battletanks.Direction.DOWN
-import com.example.battletanks.Direction.LEFT
-import com.example.battletanks.Direction.RIGHT
-import com.example.battletanks.Direction.UP
 import com.example.battletanks.databinding.ActivityMainBinding
+import com.example.battletanks.drawers.ElementsDrawer
+import com.example.battletanks.drawers.GridDrawer
+import com.example.battletanks.enums.Direction
+import com.example.battletanks.enums.Direction.DOWN
+import com.example.battletanks.enums.Direction.LEFT
+import com.example.battletanks.enums.Direction.RIGHT
+import com.example.battletanks.enums.Direction.UP
+import com.example.battletanks.enums.Material
 
 const val CELL_SIZE = 50
 
@@ -28,7 +32,11 @@ class MainActivity : AppCompatActivity() {
 
     private var editMode = false
     private val grindDrawer by lazy {
-        GridDrawer(this)
+        GridDrawer(binding.container)
+    }
+
+    private val elementsDrawer by lazy {
+        ElementsDrawer(binding.container)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +45,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportActionBar?.title = "Menu"
+
+        binding.editorClear.setOnClickListener { elementsDrawer.currentMaterial = Material.EMPTY}
+        binding.editorBrick.setOnClickListener { elementsDrawer.currentMaterial = Material.BRICK}
+        binding.editorConcrete.setOnClickListener { elementsDrawer.currentMaterial = Material.CONCRETE}
+        binding.editorGrass.setOnClickListener { elementsDrawer.currentMaterial = Material.GRASS}
+        binding.container.setOnTouchListener { _, event ->
+            elementsDrawer.onTouchContainer(event.x, event.y)
+            return@setOnTouchListener true
+        }
     }
 
     private fun switcheditMode() {
