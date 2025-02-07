@@ -6,15 +6,19 @@ import android.view.KeyEvent.KEYCODE_DPAD_DOWN
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
 import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
 import android.view.KeyEvent.KEYCODE_DPAD_UP
-import androidx.appcompat.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.widget.FrameLayout
-import com.example.battletanks.databinding.ActivityMainBinding
-import com.example.battletanks.Direction.UP
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginLeft
+import androidx.core.view.marginTop
 import com.example.battletanks.Direction.DOWN
 import com.example.battletanks.Direction.LEFT
 import com.example.battletanks.Direction.RIGHT
-import android.view.MenuItem
-import android.view.Menu
+import com.example.battletanks.Direction.UP
+import com.example.battletanks.databinding.ActivityMainBinding
 
 const val CELL_SIZE = 50
 
@@ -22,6 +26,7 @@ lateinit var binding: ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
+    private var editMode = false
     private val grindDrawer by lazy {
         GridDrawer(this)
     }
@@ -34,6 +39,17 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.title = "Menu"
     }
 
+    private fun switcheditMode() {
+        if (editMode) {
+            grindDrawer.removeGrid()
+            binding.materialsContainer.visibility = INVISIBLE
+        } else {
+            grindDrawer.drawGrid()
+            binding.materialsContainer.visibility = VISIBLE
+        }
+        editMode = !editMode
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.settings, menu)
         return true
@@ -42,7 +58,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_settings -> {
-                grindDrawer.drawGrid()
+                switcheditMode()
                 return true
             }
             else -> super.onOptionsItemSelected(item)
@@ -84,7 +100,7 @@ class MainActivity : AppCompatActivity() {
 
             RIGHT -> {
                 binding.myTank.rotation = 90f
-                if (binding.myTank.marginLeft + binding.myTank.wight < binding.container.width / CELL_SIZE * CELL_SIZE) {
+                if (binding.myTank.marginLeft + binding.myTank.width < binding.container.width / CELL_SIZE * CELL_SIZE) {
                     (binding.myTank.layoutParams as FrameLayout.LayoutParams).leftMargin += CELL_SIZE
                 }
             }
