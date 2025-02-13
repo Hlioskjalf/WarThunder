@@ -55,10 +55,11 @@ class MainActivity : AppCompatActivity() {
 
         supportActionBar?.title = "Menu"
 
-        binding.editorClear.setOnClickListener { elementsDrawer.currentMaterial = Material.EMPTY}
-        binding.editorBrick.setOnClickListener { elementsDrawer.currentMaterial = Material.BRICK}
-        binding.editorConcrete.setOnClickListener { elementsDrawer.currentMaterial = Material.CONCRETE}
-        binding.editorGrass.setOnClickListener { elementsDrawer.currentMaterial = Material.GRASS}
+        binding.editorClear.setOnClickListener {elementsDrawer.currentMaterial = Material.EMPTY}
+        binding.editorBrick.setOnClickListener {elementsDrawer.currentMaterial = Material.BRICK}
+        binding.editorConcrete.setOnClickListener {elementsDrawer.currentMaterial = Material.CONCRETE}
+        binding.editorGrass.setOnClickListener {elementsDrawer.currentMaterial = Material.GRASS}
+        binding.editorEagle.setOnClickListener {elementsDrawer.currentMaterial = Material.EAGLE}
         binding.container.setOnTouchListener { _, event ->
             elementsDrawer.onTouchContainer(event.x, event.y)
             return@setOnTouchListener true
