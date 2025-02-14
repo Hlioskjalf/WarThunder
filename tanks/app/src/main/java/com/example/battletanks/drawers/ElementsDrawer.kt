@@ -83,16 +83,17 @@ class ElementsDrawer (private val container: FrameLayout){
         return elements
     }
 
-    private fun removeIfSingleInstance() {
-        if (currentMaterial.canExistOnlyOne) {
-            elementsOnContainer.firstOrNull {it.material == currentMaterial}?.coordinate?.let {
-                eraseView(it)
+    private fun removeUnwantedInstance() {
+        if (currentMaterial.elementsAmountOnScreen != 0) {
+            val erasingElement = elementsOnContainer.filter {it.material == currentMaterial}
+            if (erasingElement.size >= currentMaterial.elementsAmountOnScreen) {
+                eraseView(erasingElements[0].coordinate)
             }
         }
     }
 
     private fun drawView(coordinate: Coordinate) {
-        removeIfSingleInstance()
+        removeUnwantedInstance()
         val view = ImageView(container.context)
         val layoutParams = FrameLayout.LayoutParams(
             currentMaterial.width * CELL_SIZE,
