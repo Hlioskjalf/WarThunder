@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.battletanks.databinding.ActivityMainBinding
 import com.example.battletanks.drawers.BulletDrawer
 import com.example.battletanks.drawers.ElementsDrawer
+import com.example.battletanks.drawers.EnemyDrawer
 import com.example.battletanks.drawers.GridDrawer
 import com.example.battletanks.drawers.TankDrawer
 import com.example.battletanks.enums.Direction.DOWN
@@ -51,6 +52,10 @@ class MainActivity : AppCompatActivity() {
         LevelStorage(this)
     }
 
+    private val enemyDrawer by lazy {
+        EnemyDrawer(binding.container)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,8 +69,6 @@ class MainActivity : AppCompatActivity() {
         binding.editorConcrete.setOnClickListener {elementsDrawer.currentMaterial = Material.CONCRETE}
         binding.editorGrass.setOnClickListener {elementsDrawer.currentMaterial = Material.GRASS}
         binding.editorEagle.setOnClickListener {elementsDrawer.currentMaterial = Material.EAGLE}
-        binding.editorEnemyRespawn.setOnClickListener {elementsDrawer.currentMaterial = Material.ENEMY_TANK_RESPAWN}
-        binding.editorPlayerRespawn.setOnClickListener {elementsDrawer.currentMaterial = Material.PLAYER_TANK_RESPAWN}
         binding.container.setOnTouchListener { _, event ->
             elementsDrawer.onTouchContainer(event.x, event.y)
             return@setOnTouchListener true
@@ -86,13 +89,11 @@ class MainActivity : AppCompatActivity() {
     private fun showSettings() {
         grindDrawer.drawGrid()
         binding.materialsContainer.visibility = VISIBLE
-        elementsDrawer.changeElementsVisibility(true)
     }
 
     private fun hideSettings() {
         grindDrawer.removeGrid()
         binding.materialsContainer.visibility = GONE
-        elementsDrawer.changeElementsVisibility(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
