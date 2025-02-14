@@ -10,7 +10,7 @@ import android.view.KeyEvent.KEYCODE_DPAD_UP
 import android.view.KeyEvent.KEYCODE_SPACE
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View.INVISIBLE
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import com.example.battletanks.databinding.ActivityMainBinding
@@ -71,17 +71,28 @@ class MainActivity : AppCompatActivity() {
             return@setOnTouchListener true
         }
         elementsDrawer.drawElementsList(levelStorage.loadLevel())
+        hideSettings()
     }
 
-    private fun switcheditMode() {
-        if (editMode) {
-            grindDrawer.removeGrid()
-            binding.materialsContainer.visibility = INVISIBLE
-        } else {
-            grindDrawer.drawGrid()
-            binding.materialsContainer.visibility = VISIBLE
-        }
+    private fun switchEditMode() {
         editMode = !editMode
+        if (editMode) {
+            showSettings()
+        } else {
+            hideSettings()
+        }
+    }
+
+    private fun showSettings() {
+        grindDrawer.drawGrid()
+        binding.materialsContainer.visibility = VISIBLE
+        elementsDrawer.changeElementsVisibility(true)
+    }
+
+    private fun hideSettings() {
+        grindDrawer.removeGrid()
+        binding.materialsContainer.visibility = GONE
+        elementsDrawer.changeElementsVisibility(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -92,7 +103,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_settings -> {
-                switcheditMode()
+                switchEditMode()
                 return true
             }
 
