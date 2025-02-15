@@ -70,8 +70,8 @@ enum class Material (
         false,
         true,
         0,
-        CELLS_TANKS_SIZE,
-        CELLS_TANKS_SIZE,
+        CELLS_TANK_SIZE,
+        CELLS_TANK_SIZE,
         R.drawable.tank
     )
 
