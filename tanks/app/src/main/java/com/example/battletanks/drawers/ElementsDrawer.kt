@@ -3,7 +3,6 @@ package com.example.battletanks.drawers
 import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ImageView
 import com.example.battletanks.CELL_SIZE
 import com.example.battletanks.enums.Material
 import com.example.battletanks.models.Coordinate

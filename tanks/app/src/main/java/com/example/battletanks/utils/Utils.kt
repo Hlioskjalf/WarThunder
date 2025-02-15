@@ -48,8 +48,14 @@ fun getElementByCoordinates(
     view.id = this.viewId
     view.layoutParams = layoutParams
     view.scaleType = ImageView.ScaleType.FIT_XY
-    (container.context as Activity).runOnUiThread {
+    container.runOnUiThread {
         container.addView(view)
+    }
+}
+
+fun FrameLayout.runOnUiThread(block: () -> Unit) {
+    (this.context as Activity).runOnUiThread {
+        block()
     }
 }
 
