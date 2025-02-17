@@ -1,6 +1,5 @@
 package com.example.battletanks.drawers
 
-import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
 import com.example.battletanks.CELL_SIZE
@@ -28,7 +27,7 @@ class ElementsDrawer (private val container: FrameLayout){
     private fun drawOrReplaceView(coordinate: Coordinate) {
         val viewOnCoordinate = getElementByCoordinates(coordinate, elementsOnContainer)
         if (viewOnCoordinate == null) {
-            drawView(coordinate)
+            createElementDrawView(coordinate)
             return
         }
         if (viewOnCoordinate.material != currentMaterial) {
@@ -42,13 +41,13 @@ class ElementsDrawer (private val container: FrameLayout){
         }
         for (element in elements) {
             currentMaterial = element.material
-            drawView((element.coordinate))
+            drawElement(element)
         }
     }
 
     private fun replaceView(coordinate: Coordinate) {
         eraseView(coordinate)
-        drawView(coordinate)
+        createElementDrawView(coordinate)
     }
 
     private fun eraseView(coordinate: Coordinate) {
@@ -86,22 +85,24 @@ class ElementsDrawer (private val container: FrameLayout){
 
     private fun removeUnwantedInstance() {
         if (currentMaterial.elementsAmountOnScreen != 0) {
-            val erasingElement = elementsOnContainer.filter {it.material == currentMaterial}
-            if (erasingElement.size >= currentMaterial.elementsAmountOnScreen) {
+            val erasingElements = elementsOnContainer.filter {it.material == currentMaterial}
+            if (erasingElements.size >= currentMaterial.elementsAmountOnScreen) {
                 eraseView(erasingElements[0].coordinate)
             }
         }
     }
 
-    private fun drawView(coordinate: Coordinate) {
+    private fun drawElement(element: Element) {
         removeUnwantedInstance()
+        element.drawElement(container)
+        elementsOnContainer.add(element)
+    }
+
+    private fun createElementDrawView(coordinate: Coordinate) {
         val element = Element(
             material = currentMaterial,
             coordinate = coordinate,
-            width = currentMaterial.width,
-            height = currentMaterial.height
         )
-        element.drawElement(container)
-        elementsOnContainer.add(element)
+       drawElement(element)
     }
 }
