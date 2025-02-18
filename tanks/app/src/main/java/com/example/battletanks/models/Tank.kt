@@ -6,9 +6,11 @@ import com.example.battletanks.CELL_SIZE
 import com.example.battletanks.binding
 import com.example.battletanks.drawers.BulletDrawer
 import com.example.battletanks.enums.Direction
-import com.example.battletanks.enums.Material
+import com.example.battletanks.enums.Material.ENEMY_TANK
+import com.example.battletanks.utils.checkIfChanceBiggerThanRandom
 import com.example.battletanks.utils.checkViewCanMoveThroughBorder
 import com.example.battletanks.utils.getElementByCoordinates
+import com.example.battletanks.utils.getTankByCoordinates
 import com.example.battletanks.utils.runOnUiThread
 import kotlin.random.Random
 
@@ -33,6 +35,7 @@ class Tank(
         ) {
             emulateViewMoving(container, view)
             element.coordinate = nextCoordinate
+            generateRandomDirectionForEnemyTank()
         } else {
             element.coordinate = currentCoordinate
             (view.layoutParams as FrameLayout.LayoutParams).topMargin = currentCoordinate.top
@@ -41,8 +44,17 @@ class Tank(
         }
     }
 
+    private fun generateRandomDirectionForEnemyTank() {
+        if (element.material != ENEMY_TANK) {
+            return
+        }
+        if (checkIfChanceBiggerThanRandom(10)) {
+            changeDirectionForEnemyTank()
+        }
+    }
+
     private fun changeDirectionForEnemyTank() {
-        if (element.material == Material.ENEMY_TANK) {
+        if (element.material == ENEMY_TANK) {
             val randomDirection = Direction.entries[Random.nextInt()(Direction.entries.size)]
             this.direction = randomDirection
         }
@@ -88,15 +100,18 @@ class Tank(
         elementsOnContainer: List<Element>
     ): Boolean {
         for (anyCoordinate in getTankCoordinates(coordinate)) {
-            val element = getElementByCoordinates(anyCoordinate, elementsOnContainer)
+            var element = getElementByCoordinates(anyCoordinate, elementsOnContainer)
+            if (element != null) {
+                element = getTankByCoordinates(anyCoordinate, bulletDrawer.enemyDrawer.tanks)
+            }
             if (element != null && !element.material.tankCanGoThrough) {
-                if(this == element) {
+                if (this == element) {
                     continue
                 }
                 return false
             }
         }
-       return true
+        return true
     }
 
     private fun getTankCoordinates (topLeftCoordinate: Coordinate): List <Coordinate> {

@@ -8,6 +8,7 @@ import com.example.battletanks.enums.Material.ENEMY_TANK
 import com.example.battletanks.models.Coordinate
 import com.example.battletanks.models.Element
 import com.example.battletanks.models.Tank
+import com.example.battletanks.utils.checkIfChanceBiggerThanRandom
 import com.example.battletanks.utils.drawElement
 
 private const val MAX_ENEMY_AMOUNT = 20
@@ -20,7 +21,8 @@ class EnemyDrawer(
     private val respawnList: List<Coordinate>
     private var enemyAmount = 0
     private var currentCoordinate:Coordinate
-    private val tanks = mutableListOf<Tank>()
+    val tanks = mutableListOf<Tank>()
+    private var moveALlTanksThread: Thread? = null
 
     init {
         respawnList = getRespawnList()
@@ -58,7 +60,7 @@ class EnemyDrawer(
                 material = ENEMY_TANK,
                 coordinate = currentCoordinate,
             ), DOWN,
-            BulletDrawer(container)
+            BulletDrawer(container, elements, this)
         )
         enemyTank.element.drawElement(container)
         elements.add(enemyTank.element)
@@ -68,14 +70,22 @@ class EnemyDrawer(
     fun moveEnemyTanks() {
         Thread( {
             while (true) {
-                removeIncosistentTanks()
-                tanks.forEach {
-                    it.move(it.direction, container, elements)
-                    it.bulletDrawer.makeBulletMove(it, elements)
-                }
+                goThroughAllTanks()
                 Thread.sleep(400)
             }
         }).start()
+    }
+
+    private fun goThroughAllTanks() {
+        moveALlTanksThread = Thread( {
+            tanks.forEach {
+                it.move(it.direction, container, elements)
+                if (checkIfChanceBiggerThanRandom(10)) {
+                    it.bulletDrawer.makeBulletMove(it)
+                }
+            }
+        })
+        moveALlTanksThread?.start()
     }
 
     fun startEnemyCreation() {
@@ -88,14 +98,9 @@ class EnemyDrawer(
         }).start()
     }
 
-    private fun removeIncosistentTanks(): List<Tank> {
-        val removingTanks = mutableListOf<Tank>()
-        val allTanksElements = elements.filter { it.material == ENEMY_TANK }
-        tanks.forEach {
-            if (!allTanksElements.contains(it.element)) {
-                removingTanks.add(it)
-            }
-        }
-        return removingTanks
+    fun removeTank(tankIndex: Int) {
+        if (tankIndex < 0) return
+        moveALlTanksThread?.join()
+        tanks.removeAt(tankIndex)
     }
 }
