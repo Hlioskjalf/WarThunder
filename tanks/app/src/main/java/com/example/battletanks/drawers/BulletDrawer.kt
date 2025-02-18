@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.example.battletanks.CELL_SIZE
+import com.example.battletanks.GameCore.isPlaying
 import com.example.battletanks.R
 import com.example.battletanks.binding
 import com.example.battletanks.enums.Direction
@@ -46,6 +47,9 @@ class BulletDrawer (
     private fun moveAllBullets() {
         Thread( {
             while(true) {
+                if (!isPlaying()) {
+                    continue
+                }
                 interactWithBullets()
                 Thread.sleep(30)
             }
@@ -100,7 +104,6 @@ class BulletDrawer (
             }
         }
     }
-
 
     private fun Bullet.canBulletGoFurther() =
         this.view.checkViewCanMoveThroughBorder(this.view.getViewCoordinate())

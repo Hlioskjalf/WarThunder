@@ -14,6 +14,9 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.example.battletanks.GameCore.isPlaying
+import com.example.battletanks.GameCore.startOrPauseGame
 import com.example.battletanks.databinding.ActivityMainBinding
 import com.example.battletanks.drawers.BulletDrawer
 import com.example.battletanks.drawers.ElementsDrawer
@@ -41,6 +44,7 @@ lateinit var binding: ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private var editMode = false
+    private lateinit var item: MenuItem
 
     private lateinit var playerTank: Tank
     private lateinit var eagle: Element
@@ -169,6 +173,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.settings, menu)
+        item = menu!!.findItem(R.id.menu_play)
         return true
     }
 
@@ -185,22 +190,40 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.menu_play -> {
-                startTheGame()
+                if (editMode) {
+                    return true
+                }
+                startOrPauseGame()
+                if (isPlaying()) {
+                    startTheGame()
+                } else {
+                    pauseTheGame()
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun pauseTheGame() {
+        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_play)
+        pauseTheGame()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        pauseTheGame()
+    }
+
     private fun startTheGame() {
-        if (editMode) {
-            return
-        }
+        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_pause)
         enemyDrawer.startEnemyCreation()
-        enemyDrawer.moveEnemyTanks()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (!isPlaying()) {
+            return super.onKeyDown(keyCode, event)
+        }
         when (keyCode) {
             KEYCODE_DPAD_UP -> move(UP)
             KEYCODE_DPAD_DOWN -> move(DOWN)
