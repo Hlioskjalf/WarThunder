@@ -89,10 +89,6 @@ class MainActivity : AppCompatActivity() {
         ElementsDrawer(binding.container)
     }
 
-    private val bulletDrawer by lazy {
-        BulletDrawer(binding.container)
-    }
-
     private val levelStorage by lazy {
         LevelStorage(this)
     }
@@ -113,8 +109,10 @@ class MainActivity : AppCompatActivity() {
         binding.editorBrick.setOnClickListener {elementsDrawer.currentMaterial = BRICK}
         binding.editorConcrete.setOnClickListener {elementsDrawer.currentMaterial = CONCRETE}
         binding.editorGrass.setOnClickListener {elementsDrawer.currentMaterial = GRASS}
-        binding.editorEagle.setOnClickListener {elementsDrawer.currentMaterial = EAGLE}
         binding.container.setOnTouchListener { _, event ->
+            if (!editMode) {
+                return@setOnTouchListener true
+            }
             elementsDrawer.onTouchContainer(event.x, event.y)
             return@setOnTouchListener true
         }
@@ -198,10 +196,10 @@ class MainActivity : AppCompatActivity() {
             KEYCODE_DPAD_DOWN -> move(DOWN)
             KEYCODE_DPAD_LEFT -> move(LEFT)
             KEYCODE_DPAD_RIGHT -> move(RIGHT)
-            KEYCODE_SPACE -> bulletDrawer.makeBulletMove(
-                binding.container.findViewById(playerTank.element.viewId),
-                playerTank.direction,
-                elementsDrawer.elementsOnContainer)
+            KEYCODE_SPACE -> playerTank.bulletDrawer.makeBulletMove(
+                playerTank,
+                elementsDrawer.elementsOnContainer
+            )
         }
         return super.onKeyDown(keyCode, event)
     }
