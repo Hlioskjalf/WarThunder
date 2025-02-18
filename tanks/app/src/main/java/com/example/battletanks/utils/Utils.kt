@@ -71,4 +71,11 @@ fun checkIfChanceBiggerThanRandom(percentChance: Int): Boolean {
     return Random.nextInt(TOTAL_PERCENT) <= percentChance
 }
 
+fun View.getViewCoordinate(tank: View): Coordinate {
+    return Coordinate(
+        (tank.layoutParams as FrameLayout.LayoutParams).topMargin,
+        (tank.layoutParams as FrameLayout.LayoutParams).leftMargin
+    )
+}
+
 
