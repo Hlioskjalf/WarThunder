@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_DPAD_DOWN
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
-import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
 import android.view.KeyEvent.KEYCODE_DPAD_UP
-import android.view.KeyEvent.KEYCODE_SPACE
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.INVISIBLE
@@ -23,9 +21,6 @@ import com.example.battletanks.drawers.ElementsDrawer
 import com.example.battletanks.drawers.EnemyDrawer
 import com.example.battletanks.drawers.GridDrawer
 import com.example.battletanks.enums.Direction
-import com.example.battletanks.enums.Direction.DOWN
-import com.example.battletanks.enums.Direction.LEFT
-import com.example.battletanks.enums.Direction.RIGHT
 import com.example.battletanks.enums.Direction.UP
 import com.example.battletanks.enums.Material.BRICK
 import com.example.battletanks.enums.Material.CONCRETE
@@ -115,6 +110,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        SoundManager.context = this
 
         supportActionBar?.title = "Menu"
 
@@ -208,6 +205,7 @@ class MainActivity : AppCompatActivity() {
     private fun pauseTheGame() {
         item.icon = ContextCompat.getDrawable(this, R.drawable.ic_play)
         pauseTheGame()
+        SoundManager.pauseSounds()
     }
 
     override fun onPause() {
@@ -218,24 +216,26 @@ class MainActivity : AppCompatActivity() {
     private fun startTheGame() {
         item.icon = ContextCompat.getDrawable(this, R.drawable.ic_pause)
         enemyDrawer.startEnemyCreation()
+        SoundManager.playIntroMusic()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (!isPlaying()) {
-            return super.onKeyDown(keyCode, event)
-        }
         when (keyCode) {
-            KEYCODE_DPAD_UP -> move(UP)
-            KEYCODE_DPAD_DOWN -> move(DOWN)
-            KEYCODE_DPAD_LEFT -> move(LEFT)
-            KEYCODE_DPAD_RIGHT -> move(RIGHT)
-            KEYCODE_SPACE -> bulletDrawer.addNewBulletForTank(playerTank)
+            KEYCODE_DPAD_UP, KEYCODE_DPAD_LEFT,
+            KEYCODE_DPAD_DOWN, KEYCODE_DPAD_LEFT -> onButtonReleased()
         }
-        return super.onKeyDown(keyCode, event)
+      return super.onKeyUp(keyCode, event)
     }
 
-    private fun move(direction: Direction) {
+    private fun onButtonPressed(direction: Direction) {
+        SoundManager.tankMove()
         playerTank.move(direction, binding.container, elementsDrawer.elementsOnContainer)
+    }
+
+    fun onButtonReleased() {
+        if (enemyDrawer.tanks.isEmpty()) {
+            SoundManager.tankStop()
+        }
     }
 }
 
