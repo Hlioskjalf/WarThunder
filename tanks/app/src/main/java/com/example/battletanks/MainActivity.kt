@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_DPAD_DOWN
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
+import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
 import android.view.KeyEvent.KEYCODE_DPAD_UP
+import android.view.KeyEvent.KEYCODE_SPACE
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.INVISIBLE
@@ -13,14 +15,15 @@ import android.view.View.VISIBLE
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.battletanks.GameCore.isPlaying
-import com.example.battletanks.GameCore.startOrPauseGame
 import com.example.battletanks.databinding.ActivityMainBinding
 import com.example.battletanks.drawers.BulletDrawer
 import com.example.battletanks.drawers.ElementsDrawer
 import com.example.battletanks.drawers.EnemyDrawer
 import com.example.battletanks.drawers.GridDrawer
 import com.example.battletanks.enums.Direction
+import com.example.battletanks.enums.Direction.DOWN
+import com.example.battletanks.enums.Direction.LEFT
+import com.example.battletanks.enums.Direction.RIGHT
 import com.example.battletanks.enums.Direction.UP
 import com.example.battletanks.enums.Material.BRICK
 import com.example.battletanks.enums.Material.CONCRETE
@@ -48,8 +51,18 @@ class MainActivity : AppCompatActivity() {
         BulletDrawer(
             binding.container,
             elementsDrawer.elementsOnContainer,
-            enemyDrawer
+            enemyDrawer,
+            soundManager,
+            gameCore
         )
+    }
+
+    private val gameCore by lazy {
+        GameCore(this)
+    }
+
+    private val soundManager by lazy {
+        SoundManager(this)
     }
 
     private fun createTank(elementWidth: Int, elementHeight: Int): Tank {
@@ -102,7 +115,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val enemyDrawer by lazy {
-        EnemyDrawer(binding.container, elementsDrawer.elementsOnContainer)
+        EnemyDrawer(binding.container, elementsDrawer.elementsOnContainer, soundManager, gameCore)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -110,8 +123,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        SoundManager.context = this
 
         supportActionBar?.title = "Menu"
 
@@ -190,8 +201,8 @@ class MainActivity : AppCompatActivity() {
                 if (editMode) {
                     return true
                 }
-                startOrPauseGame()
-                if (isPlaying()) {
+                gameCore.startOrPauseGame()
+                if (gameCore.isPlaying()) {
                     startTheGame()
                 } else {
                     pauseTheGame()
@@ -204,8 +215,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun pauseTheGame() {
         item.icon = ContextCompat.getDrawable(this, R.drawable.ic_play)
-        pauseTheGame()
-        SoundManager.pauseSounds()
+        gameCore.pauseTheGame()
+        soundManager.pauseSounds()
     }
 
     override fun onPause() {
@@ -216,25 +227,39 @@ class MainActivity : AppCompatActivity() {
     private fun startTheGame() {
         item.icon = ContextCompat.getDrawable(this, R.drawable.ic_pause)
         enemyDrawer.startEnemyCreation()
-        SoundManager.playIntroMusic()
+        soundManager.playIntroMusic()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (!gameCore.isPlaying()) {
+            return super.onKeyDown(keyCode, event)
+        }
         when (keyCode) {
-            KEYCODE_DPAD_UP, KEYCODE_DPAD_LEFT,
-            KEYCODE_DPAD_DOWN, KEYCODE_DPAD_LEFT -> onButtonReleased()
+            KEYCODE_DPAD_UP -> onButtonPressed(UP)
+            KEYCODE_DPAD_DOWN -> onButtonPressed(DOWN)
+            KEYCODE_DPAD_LEFT -> onButtonPressed(LEFT)
+            KEYCODE_DPAD_RIGHT -> onButtonPressed(RIGHT)
+            KEYCODE_SPACE -> bulletDrawer.addNewBulletForTank(playerTank)
         }
       return super.onKeyUp(keyCode, event)
     }
 
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        when(keyCode) {
+            KEYCODE_DPAD_UP, KEYCODE_DPAD_LEFT,
+            KEYCODE_DPAD_DOWN, KEYCODE_DPAD_RIGHT -> onButtonReleased()
+        }
+        return super.onKeyUp(keyCode, event)
+    }
+
     private fun onButtonPressed(direction: Direction) {
-        SoundManager.tankMove()
+        soundManager.tankMove()
         playerTank.move(direction, binding.container, elementsDrawer.elementsOnContainer)
     }
 
-    fun onButtonReleased() {
+    private fun onButtonReleased() {
         if (enemyDrawer.tanks.isEmpty()) {
-            SoundManager.tankStop()
+            soundManager.tankStop()
         }
     }
 }
