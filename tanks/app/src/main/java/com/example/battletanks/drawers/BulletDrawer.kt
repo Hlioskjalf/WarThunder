@@ -7,7 +7,7 @@ import android.widget.ImageView
 import com.example.battletanks.CELL_SIZE
 import com.example.battletanks.GameCore
 import com.example.battletanks.R
-import com.example.battletanks.SoundManager
+import sounds.MainSoundPlayer
 import com.example.battletanks.enums.Direction
 import com.example.battletanks.enums.Material
 import com.example.battletanks.models.Bullet
@@ -27,7 +27,7 @@ class BulletDrawer (
     private val container: FrameLayout,
     private val elements:MutableList<Element>,
     private val enemyDrawer: EnemyDrawer,
-    private val soundManager: SoundManager,
+    private val soundManager: MainSoundPlayer,
     private val gameCore: GameCore
 ) {
 

@@ -3,7 +3,7 @@ package com.example.battletanks.drawers
 import android.widget.FrameLayout
 import com.example.battletanks.CELL_SIZE
 import com.example.battletanks.GameCore
-import com.example.battletanks.SoundManager
+import sounds.MainSoundPlayer
 import com.example.battletanks.enums.CELLS_TANK_SIZE
 import com.example.battletanks.enums.Direction.DOWN
 import com.example.battletanks.enums.Material.ENEMY_TANK
@@ -18,7 +18,7 @@ private const val MAX_ENEMY_AMOUNT = 20
 class EnemyDrawer(
     private val container: FrameLayout,
     private val elements: MutableList<Element>,
-    private val soundManager: SoundManager,
+    private val soundManager: MainSoundPlayer,
     private val gameCore: GameCore
 ) {
 
