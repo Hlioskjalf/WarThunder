@@ -1,9 +1,8 @@
 package com.example.battletanks.drawers
 
 import android.widget.FrameLayout
-import com.example.battletanks.CELL_SIZE
 import com.example.battletanks.GameCore
-import sounds.MainSoundPlayer
+import com.example.battletanks.activities.CELL_SIZE
 import com.example.battletanks.enums.CELLS_TANK_SIZE
 import com.example.battletanks.enums.Direction.DOWN
 import com.example.battletanks.enums.Material.ENEMY_TANK
@@ -12,6 +11,7 @@ import com.example.battletanks.models.Element
 import com.example.battletanks.models.Tank
 import com.example.battletanks.utils.checkIfChanceBiggerThanRandom
 import com.example.battletanks.utils.drawElement
+import sounds.MainSoundPlayer
 
 private const val MAX_ENEMY_AMOUNT = 20
 
@@ -116,7 +116,16 @@ class EnemyDrawer(
         moveEnemyTanks()
     }
 
+    private fun isAllTanksDestroyed(): Boolean {
+        return enemyAmount == MAX_ENEMY_AMOUNT && tanks.toList().isEmpty()
+    }
+
+    private fun getPlayerScore() = enemyAmount * 100
+
     fun removeTank(tankIndex: Int) {
         tanks.removeAt(tankIndex)
+        if (isAllTanksDestroyed()) {
+            gameCore.playerWon(getPlayerScore())
+        }
     }
 }
