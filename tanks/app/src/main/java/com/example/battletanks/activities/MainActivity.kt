@@ -55,6 +55,8 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     private lateinit var playerTank: Tank
     private lateinit var eagle: Element
 
+    private var gameStarted = false
+
     private val bulletDrawer by lazy {
         BulletDrawer(
             binding.container,
@@ -132,7 +134,6 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        soundManager.loadSounds()
         supportActionBar?.title = "Menu"
 
         binding.editorClear.setOnClickListener {elementsDrawer.currentMaterial = EMPTY}
@@ -210,16 +211,32 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
                 if (editMode) {
                     return true
                 }
-                gameCore.startOrPauseGame()
-                if (gameCore.isPlaying()) {
-                    startTheGame()
-                } else {
-                    pauseTheGame()
+                showIntro()
+                if (soundManager.allSoundsReady()) {
+                    gameCore.startOrPauseGame()
+                    if (gameCore.isPlaying()) {
+                        resumeTheGame()
+                    } else {
+                        pauseTheGame()
+                    }
                 }
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun resumeTheGame() {
+        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_pause)
+        gameCore.resumeTheGame()
+    }
+
+    private fun showIntro() {
+        if (gameStarted) {
+            return
+        }
+        gameStarted = true
+        soundManager.loadSounds()
     }
 
     private fun pauseTheGame() {
@@ -231,12 +248,6 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     override fun onPause() {
         super.onPause()
         pauseTheGame()
-    }
-
-    private fun startTheGame() {
-        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_pause)
-        enemyDrawer.startEnemyCreation()
-        soundManager.playIntroMusic()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -254,6 +265,9 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (!gameCore.isPlaying()) {
+            return super.onKeyUp(keyCode, event)
+        }
         when(keyCode) {
             KEYCODE_DPAD_UP, KEYCODE_DPAD_LEFT,
             KEYCODE_DPAD_DOWN, KEYCODE_DPAD_RIGHT -> onButtonReleased()
@@ -290,6 +304,9 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
         binding.container.visibility = VISIBLE
         binding.totalContainer.setBackgroundResource(R.color.black)
         binding.initTitle.visibility = GONE
+        enemyDrawer.startEnemyCreation()
+        soundManager.playIntroMusic()
+        resumeTheGame()
     }
 }
 
