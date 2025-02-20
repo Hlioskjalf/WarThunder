@@ -5,7 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.battletanks.R
+import com.example.battletanks.databinding.ActivityScoreBinding
+import sounds.ScoreSoundPlayer
 
 const val SCORE_REQUEST_CODE = 100
 
@@ -22,12 +23,40 @@ class ScoreActivity: AppCompatActivity() {
         }
     }
 
+    private val scoreSoundPlayer by lazy {
+        ScoreSoundPlayer(this, soundReadyListener = {
+            startScoreCounting()
+        })
+    }
+
+    private fun startScoreCounting() {
+        Thread(Runnable {
+            var currentScore = 0
+            while (currentScore <= score) {
+                runOnUiThread {
+                    binding.scoreTextView.text = currentScore.toString()
+                    currentScore += 100
+                }
+                Thread.sleep(150)
+            }
+            scoreSoundPlayer.pauseScoreSound()
+        }).start()
+    }
+
     var score = 0
+    private lateinit var binding: ActivityScoreBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_score)
+        binding = ActivityScoreBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         score = intent.getIntExtra(EXTRA_SCORE, 0)
+        scoreSoundPlayer.playScoreSound()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        scoreSoundPlayer.pauseScoreSound()
     }
 
     override fun onBackPressed() {
