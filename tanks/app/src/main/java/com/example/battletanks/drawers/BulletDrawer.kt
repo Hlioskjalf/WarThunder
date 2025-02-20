@@ -19,6 +19,11 @@ import com.example.battletanks.utils.getElementByCoordinates
 import com.example.battletanks.utils.getTankByCoordinates
 import com.example.battletanks.utils.getViewCoordinate
 import com.example.battletanks.utils.runOnUiThread
+import com.example.battletanks.enums.Direction.DOWN
+import com.example.battletanks.enums.Direction.UP
+import com.example.battletanks.enums.Direction.LEFT
+import com.example.battletanks.enums.Direction.RIGHT
+
 
 private const val BULLET_WIDTH = 15
 private const val BULLET_HEIGHT = 25
@@ -48,7 +53,7 @@ class BulletDrawer (
         allBullets.firstOrNull {it.tank == this} != null
 
     private fun moveAllBullets() {
-        Thread( {
+        Thread(Runnable {
             while(true) {
                 if (!gameCore.isPlaying()) {
                     continue
@@ -64,10 +69,10 @@ class BulletDrawer (
             val view = bullet.view
             if (bullet.canBulletGoFurther()) {
                 when (bullet.direction) {
-                    Direction.UP -> (view.layoutParams as FrameLayout.LayoutParams).topMargin -= BULLET_HEIGHT
-                    Direction.DOWN -> (view.layoutParams as FrameLayout.LayoutParams).topMargin += BULLET_HEIGHT
-                    Direction.LEFT -> (view.layoutParams as FrameLayout.LayoutParams).leftMargin -= BULLET_HEIGHT
-                    Direction.RIGHT -> (view.layoutParams as FrameLayout.LayoutParams).leftMargin += BULLET_HEIGHT
+                    UP -> (view.layoutParams as FrameLayout.LayoutParams).topMargin -= BULLET_HEIGHT
+                    DOWN -> (view.layoutParams as FrameLayout.LayoutParams).topMargin += BULLET_HEIGHT
+                    LEFT -> (view.layoutParams as FrameLayout.LayoutParams).leftMargin -= BULLET_HEIGHT
+                    RIGHT -> (view.layoutParams as FrameLayout.LayoutParams).leftMargin += BULLET_HEIGHT
                 }
                 chooseBehaviorInTermsOfDirections(bullet)
                 container.runOnUiThread {
@@ -114,11 +119,10 @@ class BulletDrawer (
 
     private fun chooseBehaviorInTermsOfDirections(bullet: Bullet) {
         when (bullet.direction) {
-            Direction.DOWN, Direction.UP -> {
+            DOWN, UP -> {
                 compareCollections(getCoordinatesForTopOrBottomDirection(bullet), bullet)
             }
-
-            Direction.LEFT, Direction.RIGHT -> {
+            LEFT, RIGHT -> {
                 compareCollections(getCoordinatesForLeftOrRightDirection(bullet), bullet)
             }
         }
@@ -126,9 +130,9 @@ class BulletDrawer (
 
     private fun compareCollections(detectedCoordinatesList: List<Coordinate>, bullet: Bullet) {
        for (coordinate in detectedCoordinatesList) {
-           var element = getElementByCoordinates(coordinate, elements)
+           var element = getTankByCoordinates(coordinate, enemyDrawer.tanks)
            if (element == null) {
-               element = getTankByCoordinates(coordinate, enemyDrawer.tanks)
+               element = getElementByCoordinates(coordinate, elements)
            }
            if (element == bullet.tank.element) {
                continue
@@ -139,19 +143,20 @@ class BulletDrawer (
 
     private fun removeElementsAndStopBullet(element: Element?, bullet: Bullet) {
         if (element != null) {
-            if (element.material.bulletCanGoThrough) {
-                return
-            }
             if (bullet.tank.element.material == Material.ENEMY_TANK
                 && element.material == Material.ENEMY_TANK
-                ) {
+            ) {
                 stopBullet(bullet)
+                return
+            }
+            if (element.material.bulletCanGoThrough) {
                 return
             }
             if (element.material.simpleBulletCanDestroy) {
                 stopBullet(bullet)
                 removeView(element)
                 removeElement(element)
+                stopGameIfNecessary(element)
                 removeTank(element)
             } else {
                 stopBullet(bullet)
@@ -161,6 +166,9 @@ class BulletDrawer (
 
     private fun removeElement(element: Element) {
         elements.remove(element)
+    }
+
+    private fun stopGameIfNecessary(element: Element) {
         if (element.material == Material.PLAYER_TANK || element.material == Material.EAGLE) {
             gameCore.destroyPlayerOrBase()
         }
